@@ -63,7 +63,7 @@ class Dino:
         # combined state
         obstacle_state.update(dino_state)
         
-        obstacle_state['dt'] = obstacle_state['dx'] / (50*obstacle_state['speed'])
+        obstacle_state['dt'] = obstacle_state['dx'] / (100*obstacle_state['speed'])
         
         return obstacle_state
         

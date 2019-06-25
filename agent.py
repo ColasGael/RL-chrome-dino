@@ -60,13 +60,13 @@ class AIAgent:
             'reward' (float): reward earned in the current state
             
         Remarks:
-            Losing the game: -1000
-            Being alive: +1
+            Losing the game: -100
+            Being alive: 0
         """
         if isCrashed:
             reward = -1000
         else:
-            reward = 1  
+            reward = 1
         
         return reward
         
@@ -94,7 +94,9 @@ class AIAgent:
             self.action = self.best_action(self.state)
         else:
             # choose random action
-            self.action = np.random.rand() < 0.01
+            self.action = (np.random.rand() < 0.5)*1
+            
+        #print(self.get_closest_state_idx(self.state), self.action)
             
         if self.action == 0:
             self.dino.run()

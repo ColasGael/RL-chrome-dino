@@ -18,7 +18,7 @@ To let the AI agent learn, go at the root of the repository and run: `python tra
 
 If you want to load a pretrained agent, add the following flag: `python train.py --load_save True`
 
-You can also save your own agent's state by entering "Z" in the command line during the simulation.
+You can also save your own agent's state by entering "S" in the command line during the simulation.
 
 ## How to customize?
 

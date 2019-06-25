@@ -212,6 +212,13 @@ class Game:
         
         next_obstacle = obstacles[0]
         
+        # check if the obstacle has been passed
+        dino_x_pos = self._driver.execute_script("return Runner.instance_.tRex['xPos']")
+        if (len(obstacles) > 1) and next_obstacle['xPos'] < dino_x_pos:
+            next_obstacle = obstacles[1]
+        # REMARK: when ducking is allowed, a more thorough test may be useful to avoid landing on the obstacle
+        #if (len(obstacles) > 1) and next_obstacle['xPos'] +  next_obstacle['width'] < dino_x_pos:
+        
         # obstacle information
         obstacle_info = {'type': next_obstacle['typeConfig']['type']}
         
