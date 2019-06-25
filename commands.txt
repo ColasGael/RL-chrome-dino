@@ -1,0 +1,7 @@
+Commands:
+	UP-ARROW : jump
+	DOWN-ARROW : duck
+	A : switch to AI player
+	H : switch to human player
+	S : save AI data
+	Q : quit

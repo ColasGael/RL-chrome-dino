@@ -33,6 +33,11 @@ class Dino:
         else: # next games
             self.game.restart()
     
+    def run(self):
+        """Do nothing (run).
+        """
+        time.sleep(self.dt)
+    
     def jump(self):
         """Make the Dino jump.
         """
@@ -58,6 +63,8 @@ class Dino:
         # combined state
         obstacle_state.update(dino_state)
         
+        obstacle_state['dt'] = obstacle_state['dx'] / (50*obstacle_state['speed'])
+        
         return obstacle_state
         
     def is_playing(self):
@@ -69,3 +76,26 @@ class Dino:
         """Check if the agent has crashed on an obstacle.
         """
         return self.game.get_crashed()
+    
+    def get_score(self):
+        """Get the current score.
+        
+        Return:
+            'score' (int): current score
+        """
+        score = self.game.get_score()
+        return score
+        
+    def get_n_sim(self):
+        """Get the current score.
+        
+        Return:
+            'n_sim' (int): number of simulations played
+        """
+        n_sim = self.game.get_n_sim()
+        return n_sim
+        
+    def quit(self):
+        """Quit the game.
+        """
+        self.game.end()

@@ -38,7 +38,7 @@ class AIAgent:
         # RL parameters
         self.args = args
         self.gamma = args.gamma
-        self.eps = 1.
+        self.eps = args.eps
         self.tolerance = args.tolerance
         # initialize the approximate MDP parameters
         self.initialize_mdp_data()
@@ -85,17 +85,24 @@ class AIAgent:
     def choose_action(self):
         """Choose the next action with an Epsilon-Greedy exploration strategy.
         """        
-        if np.random.rand() < self.eps:            
+        # update state
+        self.state = self.dino.get_state()
+        
+        # epsilon-greedy strategy
+        if np.random.rand() < self.eps: 
+            # choose greedily the best action
             self.action = self.best_action(self.state)
         else:
+            # choose random action
             self.action = np.random.rand() < 0.01
             
-        if self.action == 1:
+        if self.action == 0:
+            self.dino.run()
+        elif self.action == 1:
             self.dino.jump()
-            
         elif self.action == 2:
             self.dino.duck()
-
+            
     def best_action(self, state):
         """Choose the next action (0, 1 or 2) that is optimal according to your current 'mdp_data'. 
         When there is no optimal action, return 0 has "do nothing" is more frequent.
@@ -112,10 +119,12 @@ class AIAgent:
         # value function if taking each action in the current state 
         score_nothing = self.mdp_data['transition_probs'][s, 0, :].dot(self.mdp_data['value'])
         score_jump = self.mdp_data['transition_probs'][s, 1, :].dot(self.mdp_data['value'])
-        score_duck = self.mdp_data['transition_probs'][s, 2, :].dot(self.mdp_data['value'])
+        
+        # DUCK ACTION NOT USED: CAN BEAT GAME WITHOUT DUCKING
+        #score_duck = self.mdp_data['transition_probs'][s, 2, :].dot(self.mdp_data['value']) 
 
         # best action in the current state
-        action = (score_jump > score_nothing and score_jump >= score_duck)*1 + (score_duck > score_nothing and score_duck > score_jump)*2
+        action = (score_jump > score_nothing)*1
         
         return action
         
@@ -134,23 +143,20 @@ class AIAgent:
             State 1 is a NO_OBSTACLE state.
         """
         # discretized state
-        dx_s, dn_cactus_s, dy_pter_s = self.mdp_data["state_discretization"]
+        dt_s, dy_pter_s = self.mdp_data["state_discretization"]
                 
         if not state: # no obstacle created yet
             return 1
-            
-        # check the type of the next obstacle
-        obs_type = OBSTACLE_TYPES[state['type']]
         
         if state['type'] == "PTERODACTYL":
             j = np.argmin(abs(dy_pter_s - state['config']))
         else:
-            j = np.argmin(abs(dn_cactus_s - state['config']))
+            j = dy_pter_s.size
         
         # closest discretized state indices
-        k = np.argmin(abs(dx_s - state['dx']))
+        k = np.argmin(abs(dt_s - state['dt']))
                 
-        return (not isFail)*(obs_type*dy_pter_s.size*dx_s.size + j*dx_s.size + k + 2)
+        return (not isFail)*(j*dt_s.size + k + 2)
         
     def initialize_mdp_data(self):
         """Save a attributes 'mdp_data' that contains all the parameters defining the approximate MDP.
@@ -165,23 +171,22 @@ class AIAgent:
             - State rewards initialized to 0
         """
         
-        num_states = ( (len(OBSTACLE_TYPES)-1)*MAX_CONSECUTIVE_OBS + 1*len(PTERODACTYL_HEIGHTS) )*self.args.n_x + 2
+        num_states = (1 + 1*len(PTERODACTYL_HEIGHTS) )*self.args.n_t + 2
         
         # state discretization
-        dx_s = np.linspace(0, self.args.max_dx, self.args.n_x)
-        dn_cactus_s = np.array(range(1, MAX_CONSECUTIVE_OBS+1))
+        dt_s = np.linspace(0, self.args.max_dt, self.args.n_t)
         dy_pter_s = np.array(PTERODACTYL_HEIGHTS).astype(float)
 
         # mdp parameters initialization
-        transition_counts = np.zeros((num_states, 3, num_states))
-        transition_probs = np.ones((num_states, 3, num_states)) / num_states
+        transition_counts = np.zeros((num_states, 2, num_states))
+        transition_probs = np.ones((num_states, 2, num_states)) / num_states
         reward_counts = np.zeros((num_states, 2))
         reward = np.zeros(num_states)
         value = np.zeros(num_states)
 
         self.mdp_data = {
             'num_states': num_states,
-            'state_discretization': [dx_s, dn_cactus_s, dy_pter_s],
+            'state_discretization': [dt_s, dy_pter_s],
             'transition_counts': transition_counts,
             'transition_probs': transition_probs,
             'reward_counts': reward_counts,

@@ -49,11 +49,11 @@ def add_env_args(parser):
                         help="Path to the Chrome driver for Selenium.")
     parser.add_argument('--dino_sprite_1x',
                         type=str,
-                        default='./sprites_perso/sonic_dinosaur.png',
+                        default='./sprites_perso/sonic_dinosaur.png', #'',
                         help="Path to the custom Dino sprite (LDPI version).")                        
     parser.add_argument('--dino_sprite_2x',
                         type=str,
-                        default='./sprites_perso/sonic_dinosaur_2x.png',
+                        default='./sprites_perso/sonic_dinosaur_2x.png', #'',
                         help="Path to the custom Dino sprite (HDPI version).")     
 
 def add_sim_args(parser):
@@ -70,28 +70,32 @@ def add_sim_args(parser):
                         help="Maximum speed of the dino.")
     parser.add_argument('--acceleration',
                         type=float,
-                        default=0.001,
+                        default=0, #0.001,
                         help="Speed increment as the dino runs.")
     parser.add_argument('--clear_time',
                         type=int,
                         default=0, #3000,
                         help="How long the horizon is free of obstacles in the beginning.")
+    parser.add_argument('--play_bg',
+                        type=bool,
+                        default=True,
+                        help="Whether to let the AI train in the background.")
                         
 
 def add_RL_args(parser):
     """Add arguments relative to the Reinforcement Learning algorithm."""
     parser.add_argument('--dt',
                         type=float,
-                        default=0.1,
-                        help="Time discretization between two successive states (in s).")
-    parser.add_argument('--n_x',
+                        default=0.05,
+                        help="Time discretization between two successive actions (in s).")
+    parser.add_argument('--n_t',
                         type=int,
-                        default=20,
-                        help="Discretization of dx = number of points on x-axis.")
-    parser.add_argument('--max_dx',
+                        default=10,
+                        help="Discretization of dt = number of points on time-axis.")
+    parser.add_argument('--max_dt',
                         type=int,
-                        default=400,
-                        help="Upper bound on dx for discretization.")
+                        default=1.,
+                        help="Upper bound on dt for discretization.")
     parser.add_argument('--n_v',
                         type=int,
                         default=8,
