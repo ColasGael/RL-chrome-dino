@@ -3,7 +3,7 @@ Reinforcement Learning to train an AI agent to play Dino Run on Chrome.
 
 ## RL algorithm
 
-The state is composed of: TODO.
+The state is composed of: the time to the next obstacle (dt), the height of the dino (y), and if the obstacle is a Pterodactyl, its flight level.
 
 The AI agent explores its environment with an increasingly greedy Epsilon-Greedy scheme.
 
@@ -11,6 +11,12 @@ At the end of each simulation, it updates its approximation of the underlying Ma
 Then it solves for the optimal value function via Value Iteration.
 
 The best action in a given state is the one that yields the largest value function in this state.
+
+## Performances
+
+After 100 simulations, the AI achieves a highscore around: 1500.
+
+However the training is unstable.
 
 ## How to let the AI play?
 
@@ -30,6 +36,7 @@ If you want to use your own:
 - update the "dino_sprite" argument in the "args.py" file with the new sprite filename.
 
 You can also modify "args.py" to change the parameters of the simulation:
+- the Simulation hyperparameters: by default they are set to their value in the original game ;
 - the Reinforcement Learning hyperparameters.
 
 ## Requirements

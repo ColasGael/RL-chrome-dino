@@ -86,20 +86,24 @@ def add_RL_args(parser):
     """Add arguments relative to the Reinforcement Learning algorithm."""
     parser.add_argument('--dt',
                         type=float,
-                        default=0.01,
+                        default=0.01, 
                         help="Time discretization between two successive actions (in s).")
     parser.add_argument('--n_t',
                         type=int,
-                        default=20,
-                        help="Discretization of dt = number of points on time-axis.")
+                        default=10, #20,
+                        help="Discretization of time to next obstacle dt = number of points on time-axis.")
     parser.add_argument('--max_dt',
                         type=int,
                         default=1.,
                         help="Upper bound on dt for discretization.")
-    parser.add_argument('--n_v',
+    parser.add_argument('--n_y',
                         type=int,
-                        default=8,
-                        help="Discretization of dino speed = number of points on velocity-axis.")
+                        default=5,
+                        help="Discretization of dino y position = number of points on y-axis.")
+    parser.add_argument('--max_y',
+                        type=int,
+                        default=100.,
+                        help="Upper bound on y for discretization.")
     parser.add_argument('--gamma',
                         type=float,
                         default=0.995,

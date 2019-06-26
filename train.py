@@ -84,6 +84,9 @@ class Gym:
 
             # otherwise launch a new game
             else:
+                # reset the number of steps
+                self.t = 0
+                
                 # current score
                 score = self.dino.get_score()
                 # check if the highscore is beaten
@@ -102,7 +105,7 @@ class Gym:
                     self.agent.reset()
                 else: 
                     self.dino.start()
-                    
+                
 
 if __name__ == '__main__':
     # get arguments needed to play the Game

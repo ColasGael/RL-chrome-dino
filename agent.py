@@ -65,7 +65,7 @@ class AIAgent:
             Being alive: 0
         """
         if isCrashed:
-            reward = -100
+            reward = -1000
         elif obsPassed:
             reward = +10
         else:
@@ -75,7 +75,15 @@ class AIAgent:
         
     def reset(self):
         """Reset the simulation parameters.
+        
+        Record the last transition.
+        Update the approximated MDP parameters.
+        Make the strategy more greedy.
+        Start a new simulation.
         """    
+        # record the last transition information
+        self.set_transition() 
+        
         # update the approximate MDP with the simulation observations
         self.update_mdp_parameters()
         
@@ -84,6 +92,9 @@ class AIAgent:
         
         # start a new simulation
         self.dino.start()
+        
+        # reset the state
+        self.state = self.dino.get_state()
         
     def choose_action(self):
         """Choose the next action with an Epsilon-Greedy exploration strategy.
@@ -95,9 +106,7 @@ class AIAgent:
         else:
             # choose random action
             self.action = (np.random.rand() < 0.5)*1
-            
-        #print(self.get_closest_state_idx(self.state), self.action)
-            
+                        
         if self.action == 0:
             self.dino.run()
         elif self.action == 1:
@@ -110,7 +119,7 @@ class AIAgent:
         When there is no optimal action, return 0 has "do nothing" is more frequent.
         
         Args:
-            'state' (dict): current state of the Bird
+            'state' (dict): current state of the Dino
             
         Return:
             'action' (int, 0 or 1): optimal action in the current state according to the approximate MDP
@@ -134,38 +143,39 @@ class AIAgent:
         """Get the index of the closest discretized state.
         
         Args:
-            'state' (dict): the current state of the Bird
+            'state' (dict): the current state of the Dino
             'isFail' (bool): whether the Game is failed
             
         Return:
             'ind' (int): index of the closest discretized state
             
         Remarks:
-            State 0 is a FAIL state.
-            State 1 is a NO_OBSTACLE state.
+            The state of the Dino is defined by: the time to the next obstacle (dt), the height of the dino (y), and if the obstacle is a Pterodactyl, its flight level.
+            State 0 is a FAIL state ; State 1 is a NO_OBSTACLE state.
         """
         # discretized state
-        dt_s, dy_pter_s = self.mdp_data["state_discretization"]
+        dt_s, dy_s, dy_pter_s = self.mdp_data["state_discretization"]
                 
         if not state: # no obstacle created yet
             return 1
         
         if state['type'] == "PTERODACTYL":
-            j = np.argmin(abs(dy_pter_s - state['config']))
+            i = np.argmin(abs(dy_pter_s - state['config']))
         else:
-            j = dy_pter_s.size
+            i = dy_pter_s.size
         
         # closest discretized state indices
-        k = np.argmin(abs(dt_s - state['dt']))
-                
-        return (not isFail)*(j*dt_s.size + k + 2)
+        j = np.argmin(abs(dt_s - state['dt']))
+        k = np.argmin(abs(dy_s - state['y']))
+        
+        return (not isFail)*(i*dt_s.size*dy_s.size + j*dy_s.size + k + 2)
         
     def initialize_mdp_data(self):
         """Save a attributes 'mdp_data' that contains all the parameters defining the approximate MDP.
         
         Parameters:
             'num_states' (int): the number of discretized states.
-                    num_states = n_obs_type * n_config * n_x + 1
+                    num_states = (1 + n_pter_levels ) * n_t * n_y + 2
         
         Initialization scheme:
             - Value function array initialized to 0
@@ -173,10 +183,11 @@ class AIAgent:
             - State rewards initialized to 0
         """
         
-        num_states = (1 + 1*len(PTERODACTYL_HEIGHTS) )*self.args.n_t + 2
+        num_states = (1 + 1*len(PTERODACTYL_HEIGHTS) )*self.args.n_t*self.args.n_y + 2
         
         # state discretization
         dt_s = np.linspace(0, self.args.max_dt, self.args.n_t)
+        dy_s = np.linspace(0, self.args.max_y, self.args.n_y)
         dy_pter_s = np.array(PTERODACTYL_HEIGHTS).astype(float)
 
         # mdp parameters initialization
@@ -188,7 +199,7 @@ class AIAgent:
 
         self.mdp_data = {
             'num_states': num_states,
-            'state_discretization': [dt_s, dy_pter_s],
+            'state_discretization': [dt_s, dy_s, dy_pter_s],
             'transition_counts': transition_counts,
             'transition_probs': transition_probs,
             'reward_counts': reward_counts,
@@ -203,6 +214,7 @@ class AIAgent:
         isCrashed = self.dino.is_crashed()
         # get the new state
         new_state = self.dino.get_state()
+        # whether an obstacle has been passed
         obsPassed = new_state['dx'] > self.state['dx']
         # get the previous state reward
         reward = self.get_reward(isCrashed, obsPassed)
@@ -228,7 +240,7 @@ class AIAgent:
         # get the index of the closest discretized previous and new states
         s = self.get_closest_state_idx(state, False)
         new_s = self.get_closest_state_idx(new_state, isCrashed)
-
+                
         # update the transition and the reward counts
         self.mdp_data['transition_counts'][s, action, new_s] += 1
         self.mdp_data['reward_counts'][new_s, 0] += reward
