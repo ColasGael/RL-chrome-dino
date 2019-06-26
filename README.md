@@ -14,7 +14,7 @@ The best action in a given state is the one that yields the largest value functi
 
 ## Performances
 
-After 100 simulations, the AI achieves a highscore around: 1500.
+After 100 simulations (successive games), the AI achieves a highscore around: 1500.
 
 However the training is unstable.
 
