@@ -50,11 +50,12 @@ class AIAgent:
         self.state = dino.get_state()
         self.action = 0
 
-    def get_reward(self, isCrashed):
+    def get_reward(self, isCrashed, obsPassed=False):
         """Reward function.
         
         Args:
             'isCrashed' (bool): whether the Game has been failed at the current state
+            'obsPassed' (bool): whether an obstacle has been passed
             
         Return:
             'reward' (float): reward earned in the current state
@@ -64,9 +65,11 @@ class AIAgent:
             Being alive: 0
         """
         if isCrashed:
-            reward = -1000
+            reward = -100
+        elif obsPassed:
+            reward = +10
         else:
-            reward = 1
+            reward = 0
         
         return reward
         
@@ -84,10 +87,7 @@ class AIAgent:
         
     def choose_action(self):
         """Choose the next action with an Epsilon-Greedy exploration strategy.
-        """        
-        # update state
-        self.state = self.dino.get_state()
-        
+        """               
         # epsilon-greedy strategy
         if np.random.rand() < self.eps: 
             # choose greedily the best action
@@ -203,8 +203,9 @@ class AIAgent:
         isCrashed = self.dino.is_crashed()
         # get the new state
         new_state = self.dino.get_state()
+        obsPassed = new_state['dx'] > self.state['dx']
         # get the previous state reward
-        reward = self.get_reward(isCrashed)
+        reward = self.get_reward(isCrashed, obsPassed)
         # store the given transition
         self.update_mdp_counts(self.state, self.action, new_state, reward, isCrashed)
         
