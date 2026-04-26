@@ -1,6 +1,8 @@
 # RL-chrome-dino
 Reinforcement Learning to train an AI agent to play Dino Run on Chrome.
 
+![Title](assets/chrome_dino_title.png)
+
 ## RL algorithm
 
 The state is composed of: the time to the next obstacle (dt), the height of the dino (y), and if the obstacle is a Pterodactyl, its flight level.
